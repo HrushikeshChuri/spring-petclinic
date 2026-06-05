@@ -16,6 +16,8 @@
 
 package org.springframework.samples.petclinic.vet;
 
+import java.time.LocalDate;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.samples.petclinic.owner.VisitRepository;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -50,6 +53,9 @@ class VetControllerTests {
 
 	@MockitoBean
 	private VetRepository vets;
+
+	@MockitoBean
+	private VisitRepository visits;
 
 	private Vet james() {
 		Vet james = new Vet();
@@ -95,6 +101,12 @@ class VetControllerTests {
 			.andExpect(status().isOk());
 		actions.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.vetList[0].id").value(1));
+	}
+
+	@Test
+	void waitingCount() throws Exception {
+		given(this.visits.countByDateGreaterThanEqual(any(LocalDate.class))).willReturn(3L);
+		mockMvc.perform(get("/vets/waiting-count")).andExpect(status().isOk()).andExpect(jsonPath("$.count").value(3));
 	}
 
 }

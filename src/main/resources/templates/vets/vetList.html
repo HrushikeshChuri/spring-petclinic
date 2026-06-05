@@ -6,6 +6,11 @@
 
   <h2 th:text="#{vets}">Veterinarians</h2>
 
+  <p>
+    <span th:text="#{waitingCount}">Waiting appointments:</span>
+    <strong id="waiting-count">—</strong>
+  </p>
+
   <table id="vets" class="table table-striped">
     <thead>
       <tr>
@@ -52,6 +57,16 @@
       <span th:unless="${currentPage < totalPages}" th:title="#{last}" class="fa fa-fast-forward"></span>
     </span>
   </div>
+
+  <script>
+    function refreshWaitingCount() {
+      fetch('/vets/waiting-count')
+        .then(response => response.json())
+        .then(data => { document.getElementById('waiting-count').textContent = data.count; });
+    }
+    refreshWaitingCount();
+    setInterval(refreshWaitingCount, 30000);
+  </script>
 </body>
 
 </html>

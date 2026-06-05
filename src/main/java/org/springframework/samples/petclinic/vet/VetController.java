@@ -15,9 +15,12 @@
  */
 package org.springframework.samples.petclinic.vet;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import org.springframework.samples.petclinic.owner.VisitRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -37,8 +40,11 @@ class VetController {
 
 	private final VetRepository vetRepository;
 
-	public VetController(VetRepository vetRepository) {
+	private final VisitRepository visitRepository;
+
+	public VetController(VetRepository vetRepository, VisitRepository visitRepository) {
 		this.vetRepository = vetRepository;
+		this.visitRepository = visitRepository;
 	}
 
 	@GetMapping("/vets.html")
@@ -64,6 +70,11 @@ class VetController {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return vetRepository.findAll(pageable);
+	}
+
+	@GetMapping("/vets/waiting-count")
+	public @ResponseBody Map<String, Long> waitingCount() {
+		return Map.of("count", visitRepository.countByDateGreaterThanEqual(LocalDate.now()));
 	}
 
 	@GetMapping({ "/vets" })
